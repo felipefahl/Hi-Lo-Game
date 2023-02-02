@@ -9,27 +9,10 @@ Console.WriteLine("========================");
 
 Console.WriteLine($"Enter number of players between {minPlayers} and {maxPlayers}:");
 
-string input = Console.ReadLine();
+int numberOfPlayers = Helper.GetValidNumericInput(minPlayers, maxPlayers);
 
-int? numberOfPlayers = TryNumberOfPlayers(input);
-
-while (!numberOfPlayers.HasValue)
-{
-    Console.WriteLine($"!!!Write a valid number of players - between {minPlayers} and {maxPlayers}!!!");
-    input = Console.ReadLine();
-    numberOfPlayers = TryNumberOfPlayers(input);
-}
-
-Game game = new Game(min, max, numberOfPlayers.Value);
+Game game = new Game(min, max, numberOfPlayers);
 game.Start();
-
-int? TryNumberOfPlayers(string input)
-{
-    int numberOfPlayers;
-    if (int.TryParse(input, out numberOfPlayers) && numberOfPlayers <= maxPlayers && numberOfPlayers >= minPlayers)
-        return numberOfPlayers;
-    return null;
-}
 
 class Game
 {
@@ -77,6 +60,7 @@ class Game
         string playAgain = Console.ReadLine();
         if (playAgain.ToLower() == "y")
         {
+            Console.Clear();
             Start();
         }
     }
@@ -90,12 +74,7 @@ class Game
         {
             Console.WriteLine($"Enter your guess between {_min} and {_max}:");
 
-            string input = Console.ReadLine();
-            if (!int.TryParse(input, out guess) || guess < _min || guess > _max)
-            {
-                Console.WriteLine($"!!!Your guess MUST be between {_min} and {_max}!!!");
-                continue;
-            }
+            guess = Helper.GetValidNumericInput(_min, _max);
 
             if (guess > player.MysteryNumber)
             {
@@ -112,6 +91,8 @@ class Game
         player.SetTurns(turns);
     }
 }
+
+
 
 class PlayerService
 {
@@ -156,4 +137,17 @@ class PlayerInfo
     }
 }
 
+public static class Helper
+{
+    public static int GetValidNumericInput(int min, int max)
+    {
+        string input = Console.ReadLine();
 
+        int guess;
+        if (int.TryParse(input, out guess) && guess >= min && guess <= max)
+            return guess;
+
+        Console.WriteLine($"!!!Your value MUST be between {min} and {max}!!!\nTry Again:");
+        return GetValidNumericInput(min, max);
+    }
+}
